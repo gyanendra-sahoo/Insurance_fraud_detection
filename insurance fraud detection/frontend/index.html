@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Insurance Fraud Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .upload-box {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-box:hover {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 1em;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            padding: 40px;
+            background: #f8f9fa;
+            display: none;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .results-header h2 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .high-risk { color: #e74c3c; }
+        .medium-risk { color: #f39c12; }
+        .low-risk { color: #27ae60; }
+        .total { color: #3498db; }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .table-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .risk-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .risk-high { background: #ffe6e6; color: #e74c3c; }
+        .risk-medium { background: #fff3e0; color: #f39c12; }
+        .risk-low { background: #e8f5e8; color: #27ae60; }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #e74c3c;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .download-section {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Auto Insurance Fraud Detection</h1>
+            <p>Upload your CSV file to detect potential fraud cases</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click to upload your CSV file</div>
+                <div class="upload-subtext">Supports CSV files up to 10MB</div>
+            </div>
+            <input type="file" id="fileInput" accept=".csv" />
+            <div id="fileName" style="margin: 20px 0; font-style: italic; color: #666;"></div>
+            <button class="btn" id="analyzeBtn" onclick="analyzeFile()" disabled>🔍 Analyze for Fraud</button>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing your data for fraud patterns...</p>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2>📊 Analysis Results</h2>
+                <p>Fraud detection analysis completed</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number total" id="totalRecords">0</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number high-risk" id="highRiskCount">0</div>
+                    <div class="stat-label">High Risk Cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number medium-risk" id="mediumRiskCount">0</div>
+                    <div class="stat-label">Medium Risk Cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number low-risk" id="lowRiskCount">0</div>
+                    <div class="stat-label">Low Risk Cases</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">🚨 High Risk Cases</div>
+                <div class="table-content">
+                    <table id="highRiskTable">
+                        <thead>
+                            <tr>
+                                <th>Record #</th>
+                                <th>Fraud Probability</th>
+                                <th>Risk Level</th>
+                                <th>Claim Amount</th>
+                                <th>Vehicle Cost</th>
+                                <th>Age</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="download-section">
+                <button class="btn" onclick="downloadResults()">💾 Download Full Results</button>
+                <button class="btn" onclick="resetAnalysis()">🔄 Analyze Another File</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let analysisResults = null;
+        let currentFileName = '';
+
+        // File input handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                currentFileName = file.name;
+                document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        });
+
+        // Simulate fraud analysis (in real implementation, this would call your Python backend)
+        function analyzeFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showError('Please select a CSV file first');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            // Parse CSV file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    const results = processCSVData(csv);
+                    displayResults(results);
+                } catch (error) {
+                    showError('Error processing CSV file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Process CSV data and simulate fraud detection
+        function processCSVData(csvData) {
+            const lines = csvData.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            
+            const results = [];
+            
+            for (let i = 1; i < lines.length && lines[i].trim(); i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                
+                if (values.length === headers.length) {
+                    const record = {};
+                    headers.forEach((header, index) => {
+                        record[header] = values[index];
+                    });
+                    
+                    // Simulate fraud detection logic
+                    const fraudProb = simulateFraudDetection(record);
+                    const riskCategory = fraudProb > 0.7 ? 'High' : fraudProb > 0.3 ? 'Medium' : 'Low';
+                    
+                    record.fraudProbability = fraudProb;
+                    record.riskCategory = riskCategory;
+                    record.recordNumber = i;
+                    
+                    results.push(record);
+                }
+            }
+            
+            return results;
+        }
+
+        // Simulate fraud detection algorithm
+        function simulateFraudDetection(record) {
+            let riskScore = 0;
+            
+            // Age-based risk
+            const age = parseInt(record.Age || 0);
+            if (age < 25 || age > 65) riskScore += 0.2;
+            
+            // Claim amount vs vehicle cost ratio
+            const claimAmount = parseFloat(record.Claim_Amount || 0);
+            const vehicleCost = parseFloat(record.Vehicle_Cost || 1);
+            const ratio = claimAmount / vehicleCost;
+            if (ratio > 0.8) riskScore += 0.3;
+            
+            // Night accident
+            const accidentHour = parseInt(record.Accident_Hour || 12);
+            if (accidentHour >= 22 || accidentHour <= 6) riskScore += 0.15;
+            
+            // Police report
+            if (record.Police_Report === 'No' || record.Police_Report === 'no') riskScore += 0.25;
+            
+            // Random component to simulate ML model uncertainty
+            riskScore += Math.random() * 0.1;
+            
+            return Math.min(riskScore, 0.99); // Cap at 99%
+        }
+
+        // Display analysis results
+        function displayResults(results) {
+            document.getElementById('loading').style.display = 'none';
+            
+            if (!results || results.length === 0) {
+                showError('No valid data found in the CSV file');
+                return;
+            }
+            
+            analysisResults = results;
+            
+            // Calculate statistics
+            const totalRecords = results.length;
+            const highRisk = results.filter(r => r.riskCategory === 'High').length;
+            const mediumRisk = results.filter(r => r.riskCategory === 'Medium').length;
+            const lowRisk = results.filter(r => r.riskCategory === 'Low').length;
+            
+            // Update statistics
+            document.getElementById('totalRecords').textContent = totalRecords;
+            document.getElementById('highRiskCount').textContent = highRisk;
+            document.getElementById('mediumRiskCount').textContent = mediumRisk;
+            document.getElementById('lowRiskCount').textContent = lowRisk;
+            
+            // Populate high-risk table
+            const highRiskData = results.filter(r => r.riskCategory === 'High')
+                                        .sort((a, b) => b.fraudProbability - a.fraudProbability)
+                                        .slice(0, 20); // Show top 20
+            
+            const tableBody = document.querySelector('#highRiskTable tbody');
+            tableBody.innerHTML = '';
+            
+            highRiskData.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.recordNumber}</td>
+                    <td>${(record.fraudProbability * 100).toFixed(1)}%</td>
+                    <td><span class="risk-badge risk-${record.riskCategory.toLowerCase()}">${record.riskCategory}</span></td>
+                    <td>${parseFloat(record.Claim_Amount || 0).toLocaleString()}</td>
+                    <td>${parseFloat(record.Vehicle_Cost || 0).toLocaleString()}</td>
+                    <td>${record.Age || 'N/A'}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        // Show error message
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+
+        // Download results as CSV
+        function downloadResults() {
+            if (!analysisResults) return;
+            
+            // Create CSV content
+            const headers = ['Record_Number', 'Fraud_Probability', 'Risk_Category'];
+            const originalHeaders = Object.keys(analysisResults[0]).filter(key => 
+                !['fraudProbability', 'riskCategory', 'recordNumber'].includes(key)
+            );
+            
+            const csvHeaders = [...originalHeaders, ...headers];
+            let csvContent = csvHeaders.join(',') + '\n';
+            
+            analysisResults.forEach(record => {
+                const row = [];
+                originalHeaders.forEach(header => {
+                    row.push(record[header] || '');
+                });
+                row.push(record.recordNumber);
+                row.push((record.fraudProbability * 100).toFixed(2) + '%');
+                row.push(record.riskCategory);
+                
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // Download file
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fraud_analysis_${currentFileName.replace('.csv', '_results.csv')}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Reset analysis
+        function resetAnalysis() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            analysisResults = null;
+            currentFileName = '';
+        }
+
+        // Drag and drop functionality
+        const uploadBox = document.querySelector('.upload-box');
+        
+        uploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadBox.style.borderColor = '#ff6b6b';
+            uploadBox.style.background = '#fff5f5';
+        });
+        
+        uploadBox.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadBox.style.borderColor = '#667eea';
+            uploadBox.style.background = '#f8f9ff';
+        });
+        
+        uploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadBox.style.borderColor = '#667eea';
+            uploadBox.style.background = '#f8f9ff';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].name.endsWith('.csv')) {
+                document.getElementById('fileInput').files = files;
+                currentFileName = files[0].name;
+                document.getElementById('fileName').textContent = `Selected: ${files[0].name}`;
+                document.getElementById('analyzeBtn').disabled = false;
+            } else {
+                showError('Please drop a CSV file');
+            }
+        });
+    </script>
+</body>
+</html>
