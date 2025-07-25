@@ -124,6 +124,16 @@ Use ensemble learning or stacking
 Integrate with a Flask API or web dashboard for real-time scoring
 
 Improve rule thresholds using data statistics
+<h1> Dashboard</h1>
+<img width="1440" height="900" alt="Screenshot 2025-07-26 at 4 45 52 AM" src="https://github.com/user-attachments/assets/5140eb50-e260-42d7-9a71-1af39aa186be" />
+<img width="1440" height="900" alt="Screenshot 2025-07-26 at 4 46 06 AM" src="https://github.com/user-attachments/assets/3b36b16c-0310-42cf-9180-9bc37bed0bd8" />
+
+
+<h1>Main result/plots/graphs</h1>
+<img width="1440" height="900" alt="Screenshot 2025-07-26 at 4 47 17 AM" src="https://github.com/user-attachments/assets/76fc1060-9510-4434-a7d7-b65092f507a6" />
+<img width="1440" height="900" alt="Screenshot 2025-07-25 at 7 54 32 PM" src="https://github.com/user-attachments/assets/f8ac5079-6997-487b-9256-582425034be9" />
+
+
 
 👤 Author
 Gyanendra Sahoo (CSE Engineer)
