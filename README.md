@@ -85,7 +85,7 @@ Clone the repo:
 bash
 Copy
 Edit
-git clone https://github.com/yourusername/Insurance_Fraud_ML.git
+git clone https://github.com/gyanendra-sahoo/Insurance_fraud_detection.git
 cd Insurance_Fraud_ML
 Install dependencies:
 
