@@ -67,7 +67,7 @@ ROC AUC (optional)
 
 Best performing model:
 ✅ Random Forest with rule-based features + encoding
-📈 Accuracy: ~72%
+📈 Accuracy: ~78%
 📌 Fraud Recall: ~14–20% (still limited due to class imbalance)
 
 📉 Visualization
